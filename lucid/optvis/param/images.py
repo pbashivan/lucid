@@ -43,5 +43,6 @@ def image(w, h=None, batch=None, sd=None, decorrelate=True, fft=True, alpha=Fals
       a = tf.nn.sigmoid(t[..., 3:])
       return tf.concat([rgb, a], -1)
   else:
-    return tf.tile(t, [1, 1, 1, 3])
+    rgb = tf.tile(t, [1, 1, 1, 3])
+    return to_valid_rgb(rgb[..., :3], decorrelate=False, sigmoid=True)
   return rgb
