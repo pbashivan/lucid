@@ -35,14 +35,15 @@ def image(w, h=None, batch=None, sd=None, decorrelate=True, fft=True, alpha=Fals
     else:
       channels = 3
   shape = [batch, w, h, channels]
-  param_f = fft_image if fft else naive
-  t = param_f(shape, sd=sd)
-  if not gray:
+  if gray:
+    t = naive(shape, sd=sd)
+    rgb = tf.tile(t, [1, 1, 1, 3])
+    return to_valid_rgb(rgb[..., :3], decorrelate=False, sigmoid=True)
+  else:
+    param_f = fft_image if fft else naive
+    t = param_f(shape, sd=sd)
     rgb = to_valid_rgb(t[..., :3], decorrelate=decorrelate, sigmoid=True)
     if alpha:
       a = tf.nn.sigmoid(t[..., 3:])
       return tf.concat([rgb, a], -1)
-  else:
-    rgb = tf.tile(t, [1, 1, 1, 3])
-    return to_valid_rgb(rgb[..., :3], decorrelate=False, sigmoid=True)
-  return rgb
+    return rgb
