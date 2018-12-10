@@ -10,7 +10,7 @@ coverage.txt
 .coverage
 lucidenv
 lucid-env
-
+lucid/scratch/js
 pip-selfcheck.json
 
 .DS_Store
