@@ -163,17 +163,17 @@ def neuron(layer_name, channel_n, x=None, y=None, batch=None):
 
 @wrap_objective
 def softmax(layer, n_channel, batch=None):
-  """Visualize a single channel"""
+  """Visualize softmaxed channel"""
   def inner(T):
     shape = tf.shape(T(layer))
     if batch is None:
       label = tf.one_hot([n_channel], shape[-1])
-      return tf.nn.softmax_cross_entropy_with_logits(
+      return -tf.nn.softmax_cross_entropy_with_logits(
         labels=label,
-        logits=tf.reduce_mean(T(layer), axis=tf.range(tf.size(shape)-1)))
+        logits=[tf.reduce_mean(T(layer), axis=tf.range(tf.size(shape)-1))])
     else:
       label = tf.tile(tf.one_hot([n_channel], tf.shape(T(layer))[-1]), [batch, 1])
-      return tf.nn.softmax_cross_entropy_with_logits(
+      return -tf.nn.softmax_cross_entropy_with_logits(
         labels=label,
         logits=tf.reduce_mean(T(layer)[batch], axis=tf.range(1, tf.size(shape)-1)))
   return inner
