@@ -42,7 +42,7 @@ log = logging.getLogger(__name__)
 
 
 def render_vis(model, objective_f, param_f=None, optimizer=None,
-               transforms=None, thresholds=(512,), print_objectives=None,
+               transforms=None, steps=(512,), loss_threshold=10., print_objectives=None,
                verbose=True, relu_gradient_override=True, use_fixed_seed=False):
   """Flexible optimization-base feature vis.
 
@@ -98,15 +98,18 @@ def render_vis(model, objective_f, param_f=None, optimizer=None,
 
     images = []
     try:
-      for i in range(max(thresholds)+1):
+      for i in range(max(steps)+1):
+        # import pdb; pdb.set_trace()
         loss_, _ = sess.run([loss, vis_op])
-        if i in thresholds:
+        # if i in steps:
+        if (loss_ > loss_threshold) or (i == max(steps)):
           vis = t_image.eval()
           images.append(vis)
           if verbose:
             print(i, loss_)
             print_objective_func(sess)
             show(np.hstack(vis))
+          break
     except KeyboardInterrupt:
       log.warning("Interrupted optimization at step {:d}.".format(i+1))
       vis = t_image.eval()
@@ -177,7 +180,6 @@ def make_vis_T(model, objective_f, param_f=None, optimizer=None,
   else:
     T = import_model(model, transform_f(t_image), t_image)
   loss = objective_f(T)
-
 
   vis_op = optimizer.minimize(-loss, global_step=global_step)
 
