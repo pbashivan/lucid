@@ -108,8 +108,11 @@ class Model(with_metaclass(ModelPropertiesMetaClass, object)):
   def name(self):
     return self.__class__.name
 
-  def load_graphdef(self):
-    self.graph_def = load_graphdef(self.model_path)
+  def load_graphdef(self, graph_def=None):
+    if graph_def is None:
+      self.graph_def = load_graphdef(self.model_path)
+    else:
+      self.graph_def = graph_def
 
   def post_import(self, scope):
     pass
