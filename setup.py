@@ -14,11 +14,10 @@
 
 """Setup script for TensorFlow Lucid."""
 
-from __future__ import absolute_import, division, print_function
-
+import lucid
 from setuptools import setup, find_packages
 
-version = "0.3.6"
+version = lucid.__version__
 
 test_deps = ["future", "twine", "pytest", "pytest-mock", "python-coveralls"]
 
@@ -57,15 +56,17 @@ setup(
         "scipy",
         "scikit-learn",
         "umap-learn",
+        "nltk",
         "ipython",
         "pillow",
         "future",
         "decorator",
         "pyopengl",
-        "click",
         "filelock",
-        "cachetools"
+        "cachetools",
+        "more-itertools",
     ],
+    setup_requires=["pytest-runner"],
     tests_require=test_deps,
     extras_require=extras,
     classifiers=[

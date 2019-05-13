@@ -28,15 +28,14 @@ from contextlib import contextmanager
 import os
 import re
 import logging
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse
 from future.moves.urllib import request
 from tensorflow import gfile
 from tempfile import gettempdir
-from io import BytesIO, StringIO
 import gc
 from filelock import FileLock
 
-from lucid.misc.io.writing import write, write_handle
+from lucid.misc.io.writing import write_handle
 
 
 # create logger with module name, e.g. lucid.misc.io.reading
@@ -110,10 +109,10 @@ def read_handle(url, cache=None, mode="rb"):
     else:
         if scheme in ("http", "https"):
             handle = _handle_web_url(url, mode=mode)
-        elif scheme == "gs":
-            handle = _handle_gcs_url(url, mode=mode)
-        else:
+        elif scheme in ("gs"):
             handle = _handle_gfile(url, mode=mode)
+        else:
+            handle = open(url, mode=mode)
 
     yield handle
     handle.close()
@@ -128,14 +127,6 @@ def _handle_gfile(url, mode="rb"):
 
 def _handle_web_url(url, mode="r"):
     return request.urlopen(url)
-
-
-def _handle_gcs_url(url, mode="r"):
-    # TODO: transparently allow authenticated access through storage API
-    _, resource_name = url.split("://")
-    base_url = "https://storage.googleapis.com/"
-    url = urljoin(base_url, resource_name)
-    return _handle_web_url(url, mode=mode)
 
 
 # Helper Functions
