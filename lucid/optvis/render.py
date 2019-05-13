@@ -96,7 +96,7 @@ def render_vis(model, objective_f, param_f=None, optimizer=None,
     loss, vis_op, t_image = T("loss"), T("vis_op"), T("input")
     tf.global_variables_initializer().run()
 
-    images = []
+    images, losses = [], []
     try:
       for i in range(max(steps)+1):
         # import pdb; pdb.set_trace()
@@ -105,6 +105,7 @@ def render_vis(model, objective_f, param_f=None, optimizer=None,
         if (loss_ > loss_threshold) or (i == max(steps)):
           vis = t_image.eval()
           images.append(vis)
+          losses.append(loss_)
           if verbose:
             print(i, loss_)
             print_objective_func(sess)
@@ -115,7 +116,7 @@ def render_vis(model, objective_f, param_f=None, optimizer=None,
       vis = t_image.eval()
       show(np.hstack(vis))
 
-    return images
+    return images, losses
 
 
 def make_vis_T(model, objective_f, param_f=None, optimizer=None,
