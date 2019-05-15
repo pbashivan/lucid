@@ -23,7 +23,7 @@ from lucid.optvis.param.spatial import pixel_image, fft_image
 
 
 def image(w, h=None, batch=None, sd=None, decorrelate=True, fft=True, alpha=False,
-          gray=False):
+          gray=False, init_val=None):
   h = h or w
   batch = batch or 1
   if gray:
@@ -35,7 +35,7 @@ def image(w, h=None, batch=None, sd=None, decorrelate=True, fft=True, alpha=Fals
       channels = 3
   shape = [batch, w, h, channels]
   param_f = fft_image if fft else pixel_image
-  t = param_f(shape, sd=sd)
+  t = param_f(shape, sd=sd, init_val=init_val)
   if gray:
     rgb = tf.tile(t, [1, 1, 1, 3])
     return to_valid_rgb(rgb[..., :3], decorrelate=False, sigmoid=True)

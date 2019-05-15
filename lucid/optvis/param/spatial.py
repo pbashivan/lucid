@@ -41,7 +41,8 @@ def pixel_image(shape, sd=None, init_val=None):
         )
 
     sd = sd or 0.01
-    init_val = init_val or np.random.normal(size=shape, scale=sd).astype(np.float32)
+    if init_val is None:
+      init_val = np.random.normal(size=shape, scale=sd).astype(np.float32)
     return tf.Variable(init_val)
 
 
@@ -58,7 +59,7 @@ def rfft2d_freqs(h, w):
     return np.sqrt(fx * fx + fy * fy)
 
 
-def fft_image(shape, sd=None, decay_power=1):
+def fft_image(shape, sd=None, decay_power=1, init_val=None):
     """An image paramaterization using 2D Fourier coefficients."""
 
     sd = sd or 0.01
@@ -69,8 +70,19 @@ def fft_image(shape, sd=None, decay_power=1):
     images = []
     for _ in range(batch):
         # Create a random variable holding the actual 2D fourier coefficients
-        init_val = np.random.normal(size=init_val_size, scale=sd).astype(np.float32)
-        spectrum_real_imag_t = tf.Variable(init_val)
+        if init_val is not None:
+          _init_fft = np.fft.fft2(init_val[_], axes=[0, 1]).astype(np.complex64).transpose(2, 0, 1)
+          if _init_fft.shape[-1] % 2 == 1:
+            _init_fft_complex = _init_fft[..., : _init_fft.shape[-1] // 2 + 2]
+          else:
+            _init_fft_complex = _init_fft[..., : _init_fft.shape[-1] // 2 + 1]
+          _init_fft = np.concatenate(
+            (np.real(_init_fft_complex)[np.newaxis], np.imag(_init_fft_complex)[np.newaxis]),
+            axis=0)
+        else:
+          _init_fft = np.random.normal(size=init_val_size, scale=sd).astype(np.float32)
+          _init_fft_complex = 0.0
+        spectrum_real_imag_t = tf.Variable(_init_fft)
         spectrum_t = tf.complex(spectrum_real_imag_t[0], spectrum_real_imag_t[1])
 
         # Scale the spectrum. First normalize energy, then scale by the square-root
@@ -78,7 +90,9 @@ def fft_image(shape, sd=None, decay_power=1):
         # This allows to use similar leanring rates to pixel-wise optimisation.
         scale = 1.0 / np.maximum(freqs, 1.0 / max(w, h)) ** decay_power
         scale *= np.sqrt(w * h)
-        scaled_spectrum_t = scale * spectrum_t
+        # scaled_spectrum_t = scale * spectrum_t
+        scaled_spectrum_t = tf.constant(_init_fft_complex) + \
+                            scale * (spectrum_t - tf.constant(_init_fft_complex))
 
         # convert complex scaled spectrum to shape (h, w, ch) image tensor
         # needs to transpose because irfft2d returns channels first
@@ -89,7 +103,7 @@ def fft_image(shape, sd=None, decay_power=1):
 
         images.append(image_t)
 
-    batched_image_t = tf.stack(images) / 4.0  # TODO: is that a magic constant?
+    batched_image_t = tf.stack(images) # / 4.0  # TODO: is that a magic constant?
     return batched_image_t
 
 
