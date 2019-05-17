@@ -59,7 +59,7 @@ def rfft2d_freqs(h, w):
     return np.sqrt(fx * fx + fy * fy)
 
 
-def fft_image(shape, sd=None, decay_power=1.5, init_val=None):
+def fft_image(shape, sd=None, decay_power=1., init_val=None):
     """An image paramaterization using 2D Fourier coefficients."""
 
     sd = sd or 0.01

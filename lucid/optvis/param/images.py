@@ -20,10 +20,11 @@ import tensorflow as tf
 
 from lucid.optvis.param.color import to_valid_rgb
 from lucid.optvis.param.spatial import pixel_image, fft_image
+from functools import partial
 
 
 def image(w, h=None, batch=None, sd=None, decorrelate=True, fft=True, alpha=False,
-          gray=False, init_val=None):
+          gray=False, init_val=None, decay_power=None):
   h = h or w
   batch = batch or 1
   if gray:
@@ -33,8 +34,13 @@ def image(w, h=None, batch=None, sd=None, decorrelate=True, fft=True, alpha=Fals
       channels = 4
     else:
       channels = 3
+
+  if decay_power is not None:
+    fft_image_func = partial(fft_image, decay_power=decay_power)
+  else:
+    fft_image_func = fft_image
   shape = [batch, w, h, channels]
-  param_f = fft_image if fft else pixel_image
+  param_f = fft_image_func if fft else pixel_image
   t = param_f(shape, sd=sd, init_val=init_val)
   if gray:
     rgb = tf.tile(t, [1, 1, 1, 3])
