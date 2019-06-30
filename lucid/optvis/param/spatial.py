@@ -90,6 +90,11 @@ def fft_image(shape, sd=None, decay_power=1., init_val=None):
         # of the number of pixels to get a unitary transformation.
         # This allows to use similar leanring rates to pixel-wise optimisation.
         scale = 1.0 / np.maximum(freqs, 1.0 / max(w, h)) ** decay_power
+
+        # alpha = (decay_power - 1.8) / 0.4
+        # f = np.maximum(freqs, 1.0 / max(w, h))
+        # scale = alpha / f ** decay_power + (1 - alpha) * f
+
         scale *= np.sqrt(w * h)
         if init_val is None:
           scaled_spectrum_t = scale * spectrum_t
@@ -106,7 +111,7 @@ def fft_image(shape, sd=None, decay_power=1., init_val=None):
 
         images.append(image_t)
 
-    batched_image_t = tf.stack(images) # / 4.0  # TODO: is that a magic constant?
+    batched_image_t = tf.stack(images) #/ 4.0  # TODO: is that a magic constant?
     return batched_image_t
 
 

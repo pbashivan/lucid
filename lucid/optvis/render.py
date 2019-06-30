@@ -99,7 +99,6 @@ def render_vis(model, objective_f, param_f=None, optimizer=None,
     images, losses = [], []
     try:
       for i in range(max(steps)+1):
-        # import pdb; pdb.set_trace()
         loss_, _ = sess.run([loss, vis_op])
         # if i in steps:
         if (loss_ > loss_threshold) or (i == max(steps)):
