@@ -111,7 +111,7 @@ def fft_image(shape, sd=None, decay_power=1., init_val=None):
 
         images.append(image_t)
 
-    batched_image_t = tf.stack(images) #/ 4.0  # TODO: is that a magic constant?
+    batched_image_t = tf.stack(images) / 4.0  # TODO: is that a magic constant?
     return batched_image_t
 
 
