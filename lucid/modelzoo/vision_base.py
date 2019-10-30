@@ -179,6 +179,7 @@ class Model(with_metaclass(ModelPropertiesMetaClass, object)):
         'Scope "%s" already exists. Provide explicit scope names when '
         'importing multiple instances of the model.') % scope
     t_input, t_prep_input = self.create_input(t_input, forget_xy_shape)
+    # if self.graph_def is None:
     tf.import_graph_def(
         self.graph_def, {self.input_name: t_prep_input}, name=scope)
     self.post_import(scope)

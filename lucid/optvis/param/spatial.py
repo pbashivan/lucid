@@ -75,6 +75,7 @@ def fft_image(shape, sd=None, decay_power=1., init_val=None):
           _init_fft_complex = np.array(0., dtype=np.complex64)
         else:
           _init_fft = np.fft.fft2(init_val[_], axes=[0, 1]).astype(np.complex64).transpose(2, 0, 1)
+          # _init_fft_complex = _init_fft
           if _init_fft.shape[-1] % 2 == 1:
             _init_fft_complex = _init_fft[..., : _init_fft.shape[-1] // 2 + 2]
           else:
@@ -82,7 +83,6 @@ def fft_image(shape, sd=None, decay_power=1., init_val=None):
           _init_fft = np.concatenate(
             (np.real(_init_fft_complex)[np.newaxis], np.imag(_init_fft_complex)[np.newaxis]),
             axis=0)
-
         spectrum_real_imag_t = tf.Variable(_init_fft)
         spectrum_t = tf.complex(spectrum_real_imag_t[0], spectrum_real_imag_t[1])
 
@@ -90,10 +90,6 @@ def fft_image(shape, sd=None, decay_power=1., init_val=None):
         # of the number of pixels to get a unitary transformation.
         # This allows to use similar leanring rates to pixel-wise optimisation.
         scale = 1.0 / np.maximum(freqs, 1.0 / max(w, h)) ** decay_power
-
-        # alpha = (decay_power - 1.8) / 0.4
-        # f = np.maximum(freqs, 1.0 / max(w, h))
-        # scale = alpha / f ** decay_power + (1 - alpha) * f
 
         scale *= np.sqrt(w * h)
         if init_val is None:
